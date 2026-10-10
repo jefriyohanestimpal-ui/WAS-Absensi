@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAS GARAGE - Sistem Absensi</title>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<style>
+:root{--primary:#c62828;--primary-dark:#8e0000;--accent:#1a237e;--accent-light:#283593;--success:#2e7d32;--danger:#c62828;--warning:#f57c00;--bg:#eceff1;--card:#fff;--text:#1a1a1a;--text-light:#546e7a;--radius:12px;--shadow:0 2px 12px rgba(0,0,0,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.header{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.2);position:sticky;top:0;z-index:100}
+.header h1{font-size:1.2rem;display:flex;align-items:center;gap:8px}
+.btn-logout{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);color:#fff;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:.85rem}
+.container{max-width:500px;margin:0 auto;padding:16px}
+.container-admin{max-width:1100px}
+.card{background:var(--card);border-radius:var(--radius);padding:20px;margin-bottom:16px;box-shadow:var(--shadow);border-top:3px solid var(--primary)}
+.card h2{font-size:1.05rem;margin-bottom:12px;display:flex;align-items:center;gap:8px;color:var(--accent)}
+.login-wrapper{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px;background:linear-gradient(135deg,var(--primary),var(--accent))}
+.login-card{background:var(--card);border-radius:16px;padding:32px 28px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,.25);text-align:center}
+.login-card .logo{font-size:3rem;margin-bottom:8px}
+.login-card h1{font-size:1.6rem;margin-bottom:4px;color:var(--primary);font-weight:800;letter-spacing:1px}
+.login-card .sub{color:var(--accent);font-size:.85rem;font-weight:600;margin-bottom:6px}
+.login-card .addr{color:var(--text-light);font-size:.78rem;margin-bottom:20px;line-height:1.4}
+.form-group{margin-bottom:14px;text-align:left}
+.form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;color:var(--accent)}
+.form-group input,.form-group select{width:100%;padding:11px 14px;border:1.5px solid #cfd8dc;border-radius:8px;font-size:.95rem;outline:none}
+.form-group input:focus,.form-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(198,40,40,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s;width:100%}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-warning{background:var(--warning);color:#fff}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-sm{padding:7px 14px;font-size:.82rem;width:auto}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.status-box{padding:14px;border-radius:8px;margin-bottom:14px;font-size:.9rem;display:flex;align-items:center;gap:8px}
+.status-ok{background:#e8f5e9;color:#1b5e20;border:1px solid #a5d6a7}
+.status-warn{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
+.status-err{background:#ffebee;color:#b71c1c;border:1px solid #ef9a9a}
+.status-info{background:#e8eaf6;color:var(--accent);border:1px solid #9fa8da}
+#reader{width:100%;border-radius:8px;overflow:hidden;margin-bottom:12px}
+.clock-display{text-align:center;padding:16px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:10px;margin-bottom:16px}
+.clock-time{font-size:2.8rem;font-weight:700;font-variant-numeric:tabular-nums}
+.clock-date{font-size:.95rem;opacity:.9;margin-top:2px}
+.geo-info{display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:.85rem}
+.geo-item{background:#f5f5f5;padding:8px 10px;border-radius:6px}
+.geo-item strong{display:block;color:var(--accent);font-size:.75rem}
+.table-wrapper{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e0e0e0}
+th{background:var(--accent);color:#fff;font-weight:600;font-size:.78rem;text-transform:uppercase;position:sticky;top:0}
+tr:hover td{background:#fafafa}
+.badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:.75rem;font-weight:600}
+.badge-in{background:#e8f5e9;color:#1b5e20}
+.badge-out{background:#ffebee;color:#b71c1c}
+.badge-geo-ok{background:#e8f5e9;color:#1b5e20}
+.badge-geo-fail{background:#ffebee;color:#b71c1c}
+.tabs{display:flex;gap:4px;background:#cfd8dc;border-radius:10px;padding:4px;margin-bottom:16px}
+.tab-btn{flex:1;padding:10px;border:none;background:transparent;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;color:var(--text-light)}
+.tab-btn.active{background:#fff;color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.tab-content{display:none}
+.tab-content.active{display:block}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);padding:16px;text-align:center;box-shadow:var(--shadow);border-left:4px solid var(--primary)}
+.stat-num{font-size:1.8rem;font-weight:700;color:var(--primary)}
+.stat-label{font-size:.78rem;color:var(--text-light);margin-top:2px}
+.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.filter-row input,.filter-row select{padding:8px 12px;border:1.5px solid #cfd8dc;border-radius:8px;font-size:.88rem;outline:none}
+.hidden{display:none!important}
+@media(max-width:600px){.container-admin{padding:10px}.stats-grid{grid-template-columns:repeat(2,1fr)}th,td{padding:8px 6px;font-size:.78rem}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--accent);color:#fff;padding:12px 24px;border-radius:8px;font-size:.9rem;z-index:9999;transition:transform .3s ease;box-shadow:0 4px 16px rgba(0,0,0,.25);max-width:90%;text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0)}
+.emp-list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e0e0e0}
+.emp-list-item:last-child{border-bottom:none}
+.emp-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.9rem;margin-right:10px;flex-shrink:0}
+.emp-info{flex:1}
+.emp-info strong{font-size:.92rem;color:var(--accent)}
+.emp-info small{color:var(--text-light);font-size:.78rem}
+.map-placeholder{width:100%;height:150px;background:#e0e0e0;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--text-light);font-size:.85rem;margin-top:8px;overflow:hidden}
+.map-placeholder iframe{width:100%;height:100%;border:none;border-radius:8px}
+.info-box{background:#f5f5f5;border-left:4px solid var(--accent);padding:10px 14px;border-radius:6px;font-size:.82rem;color:var(--text-light);margin-bottom:14px}
+.info-box strong{color:var(--accent)}
+.welcome-card{text-align:center;padding:24px}
+.welcome-card .big-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:2rem;margin:0 auto 12px}
+.welcome-card h3{color:var(--accent);font-size:1.3rem;margin-bottom:4px}
+.welcome-card .role{color:var(--text-light);font-size:.9rem}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN -->
+<div id="page-login" class="login-wrapper">
+  <div class="login-card">
+    <div class="logo">🔧</div>
+    <h1>WAS GARAGE</h1>
+    <div class="sub">Sistem Absensi Karyawan</div>
+    <div class="addr">📍 Jl. Pramuka No. 72 Sariokotabaru<br>Sario, Manado, Sulawesi Utara</div>
+    <div class="form-group">
+      <label>Login Sebagai</label>
+      <select id="login-role" onchange="toggleLogin()">
+        <option value="employee">👷 Karyawan</option>
+        <option value="admin">👩‍💼 Admin (Cintya)</option>
+      </select>
+    </div>
+    <div class="form-group" id="lg-emp">
+      <label>ID Karyawan</label>
+      <input type="text" id="login-emp-id" placeholder="Masukkan ID Karyawan">
+    </div>
+    <div class="form-group hidden" id="lg-admin">
+      <label>Password Admin</label>
+      <input type="password" id="login-admin-pass" placeholder="Masukkan password">
+    </div>
+    <button class="btn btn-primary" onclick="doLogin()">🔑 Masuk</button>
+  </div>
+</div>
+
+<!-- KARYAWAN -->
+<div id="page-employee" class="hidden">
+  <div class="header">
+    <h1>🔧 WAS GARAGE</h1>
+    <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  </div>
+  <div class="container">
+    <div class="clock-display">
+      <div class="clock-time" id="emp-clock">00:00:00</div>
+      <div class="clock-date" id="emp-date">-</div>
+    </div>
+
+    <!-- CARD SAMBUTAN (TANPA BARCODE) -->
+    <div class="card welcome-card">
+      <div class="big-avatar" id="emp-avatar">A</div>
+      <h3 id="emp-name">-</h3>
+      <div class="role" id="emp-id-display">-</div>
+    </div>
+
+    <div class="card">
+      <h2>📍 Lokasi GPS</h2>
+      <div class="info-box"><strong>📍 WAS GARAGE</strong><br>Jl. Pramuka No. 72, Sario, Manado<br>Koordinat: 1.4676° N, 124.8383° E</div>
+      <div id="geo-status" class="status-box status-info">⏳ Mendapatkan lokasi...</div>
+      <div class="geo-info" id="geo-info" style="display:none">
+        <div class="geo-item"><strong>Latitude</strong><span id="geo-lat">-</span></div>
+        <div class="geo-item"><strong>Longitude</strong><span id="geo-lng">-</span></div>
+        <div class="geo-item"><strong>Akurasi</strong><span id="geo-acc">-</span></div>
+        <div class="geo-item"><strong>Jarak ke Bengkel</strong><span id="geo-dist">-</span></div>
+      </div>
+      <div class="map-placeholder" id="map-box">🗺️ Peta akan muncul setelah lokasi didapat</div>
+      <button class="btn btn-sm btn-accent" style="margin-top:10px;width:100%" onclick="getGeo()">🔄 Refresh Lokasi</button>
+    </div>
+
+    <div class="card">
+      <h2>📷 Scan QR Code Absensi</h2>
+      <p style="font-size:.85rem;color:var(--text-light);margin-bottom:10px">Arahkan kamera ke QR Code yang tertempel di pintu masuk bengkel</p>
+      <div id="reader"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-sm btn-primary" id="btn-scan" onclick="startScan()">▶️ Mulai Scan</button>
+        <button class="btn btn-sm btn-danger hidden" id="btn-stop" onclick="stopScan()">⏹️ Stop</button>
+      </div>
+      <div id="scan-res" class="status-box status-info hidden" style="margin-top:10px"></div>
+    </div>
+
+    <div class="card">
+      <h2>⏰ Absensi Hari Ini</h2>
+      <div id="today-st" class="status-box status-info">ℹ️ Belum absen hari ini</div>
+      <div id="today-rec" style="font-size:.88rem;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-success" id="btn-in" onclick="clockIn()">✅ Clock IN</button>
+        <button class="btn btn-danger" id="btn-out" onclick="clockOut()" disabled>🚪 Clock OUT</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>📋 Riwayat (7 Hari)</h2>
+      <div class="table-wrapper">
+        <table><thead><tr><th>Tanggal</th><th>IN</th><th>OUT</th><th>Status</th></tr></thead><tbody id="emp-hist"></tbody></table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="hidden">
+  <div class="header">
+    <h1>👩‍💼 Admin WAS GARAGE - Cintya</h1>
+    <button class="btn-logout" onclick="doLogout()">Keluar</button>
+  </div>
+  <div class="container container-admin">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total Karyawan</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-hadir" style="color:var(--success)">0</div><div class="stat-label">Hadir Hari Ini</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-belum" style="color:var(--warning)">0</div><div class="stat-label">Belum Absen</div></div>
+      <div class="stat-card"><div class="stat-num" id="s-pulang" style="color:var(--danger)">0</div><div class="stat-label">Sudah Pulang</div></div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('t-absen',this)">📋 Data Absen</button>
+      <button class="tab-btn" onclick="switchTab('t-emp',this)">👥 Karyawan</button>
+      <button class="tab-btn" onclick="switchTab('t-set',this)">⚙️ Setting</button>
+    </div>
+
+    <div class="tab-content active" id="t-absen">
+      <div class="card">
+        <h2>📊 Rekap Absensi</h2>
+        <div class="filter-row">
+          <input type="date" id="f-date" onchange="renderTable()">
+          <select id="f-emp" onchange="renderTable()"><option value="">Semua</option></select>
+          <button class="btn btn-sm btn-accent" onclick="exportCSV()">📥 CSV</button>
+          <button class="btn btn-sm btn-danger" onclick="clearData()">🗑️ Hapus</button>
+        </div>
+        <div class="table-wrapper">
+          <table><thead><tr><th>No</th><th>Karyawan</th><th>Tanggal</th><th>IN</th><th>OUT</th><th>Geo IN</th><th>Geo OUT</th><th>Barcode</th></tr></thead><tbody id="t-body"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="t-emp">
+      <div class="card">
+        <h2>👥 Daftar Karyawan</h2>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input type="text" id="n-name" placeholder="Nama" style="flex:1;min-width:120px;padding:8px 12px;border:1.5px solid #cfd8dc;border-radius:8px">
+          <input type="text" id="n-role" placeholder="Jabatan" style="flex:1;min-width:120px;padding:8px 12px;border:1.5px solid #cfd8dc;border-radius:8px">
+          <button class="btn btn-sm btn-success" onclick="addEmp()">➕ Tambah</button>
+        </div>
+        <div id="emp-list"></div>
+      </div>
+    </div>
+
+    <div class="tab-content" id="t-set">
+      <div class="card">
+        <h2>⚙️ Pengaturan</h2>
+        <div class="info-box"><strong>📍 WAS GARAGE</strong><br>Jl. Pramuka No. 72, Sario, Manado<br>1.4676° N, 124.8383° E</div>
+        <div class="form-group"><label>Latitude</label><input type="number" step="any" id="s-lat" value="1.4676"></div>
+        <div class="form-group"><label>Longitude</label><input type="number" step="any" id="s-lng" value="124.8383"></div>
+        <div class="form-group"><label>Radius (meter)</label><input type="number" id="s-rad" value="200"></div>
+        <div class="form-group"><label>Barcode Bengkel (sesuaikan dengan QR yang ditempel)</label><input type="text" id="s-bc" value="WAS-GARAGE-2026"></div>
+        <div class="form-group"><label>Password Admin</label><input type="text" id="s-pass" value="cintya2026"></div>
+        <button class="btn btn-primary" onclick="saveSet()">💾 Simpan</button>
+        <button class="btn btn-sm btn-warning" style="margin-top:8px" onclick="useLoc()">📍 Gunakan Lokasi Saat Ini</button>
+      </div>
+      <div class="card">
+        <h2>📌 Info Barcode Bengkel</h2>
+        <p style="font-size:.88rem;color:var(--text-light);margin-bottom:10px">
+          Barcode yang harus ada di QR Code yang Anda tempel di pintu masuk:
+        </p>
+        <div style="font-family:'Courier New',monospace;font-size:1.3rem;letter-spacing:3px;background:#f5f5f5;padding:12px;border-radius:6px;text-align:center;margin:8px 0;color:var(--primary);font-weight:700;border:2px dashed var(--accent)" id="set-bc-display">WAS-GARAGE-2026</div>
+        <p style="font-size:.82rem;color:var(--text-light);line-height:1.5">
+          💡 <strong>Cara buat QR:</strong><br>
+          1. Buka <b>qr-code-generator.com</b> atau <b>qrcode-monkey.com</b><br>
+          2. Pilih tipe <b>Text</b><br>
+          3. Masukkan teks barcode di atas<br>
+          4. Download & cetak (ukuran 15x15 cm)<br>
+          5. Laminating & tempel di pintu masuk bengkel
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var DEFS_EMP = [
+  {id:'YOPI',name:'Yopi',role:'Foreman'},
+  {id:'NOVAL',name:'Noval',role:'Helper Mekanik'},
+  {id:'GABRIEL',name:'Gabriel',role:'Helper Mekanik'},
+  {id:'PRIMA',name:'Prima',role:'Helper Mekanik'}
+];
+var DEFS_SET = {lat:1.4676,lng:124.8383,radius:200,barcode:'WAS-GARAGE-2026',adminPass:'cintya2026'};
+
+var curUser=null, curGeo=null, scanner=null, scanOn=false;
+
+function gE(){var d=localStorage.getItem('wg_emp');if(!d){localStorage.setItem('wg_emp',JSON.stringify(DEFS_EMP));return DEFS_EMP}return JSON.parse(d)}
+function sE(a){localStorage.setItem('wg_emp',JSON.stringify(a))}
+function gS(){var d=localStorage.getItem('wg_set');if(!d){localStorage.setItem('wg_set',JSON.stringify(DEFS_SET));return DEFS_SET}return JSON.parse(d)}
+function sS(o){localStorage.setItem('wg_set',JSON.stringify(o))}
+function gA(){var d=localStorage.getItem('wg_att');return d?JSON.parse(d):[]}
+function sA(a){localStorage.setItem('wg_att',JSON.stringify(a))}
+
+function toast(m){var t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},3000)}
+
+function toggleLogin(){
+  var r=document.getElementById('login-role').value;
+  document.getElementById('lg-emp').classList.toggle('hidden',r==='admin');
+  document.getElementById('lg-admin').classList.toggle('hidden',r==='employee');
+}
+
+function doLogin(){
+  var r=document.getElementById('login-role').value;
+  if(r==='employee'){
+    var id=document.getElementById('login-emp-id').value.trim().toUpperCase();
+    var emps=gE();
+    var emp=emps.find(function(e){return e.id===id||e.name.toUpperCase()===id});
+    if(!emp){toast('❌ ID tidak ditemukan!');return}
+    curUser=emp;
+    showPage('employee');
+  } else {
+    var p=document.getElementById('login-admin-pass').value;
+    if(p!==gS().adminPass){toast('❌ Password salah!');return}
+    showPage('admin');
+  }
+}
+
+function doLogout(){
+  stopScan();
+  curUser=null;curGeo=null;
+  showPage('login');
+}
+
+function showPage(p){
+  document.getElementById('page-login').classList.toggle('hidden',p!=='login');
+  document.getElementById('page-employee').classList.toggle('hidden',p!=='employee');
+  document.getElementById('page-admin').classList.toggle('hidden',p!=='admin');
+  if(p==='employee') initEmp();
+  if(p==='admin') initAdmin();
+}
+
+function tick(){
+  var n=new Date();
+  var el=document.getElementById('emp-clock');
+  var el2=document.getElementById('emp-date');
+  if(el) el.textContent=n.toLocaleTimeString('id-ID',{hour12:false});
+  if(el2) el2.textContent=n.toLocaleDateString('id-ID',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+setInterval(tick,1000);tick();
+
+function initEmp(){
+  document.getElementById('emp-name').textContent=curUser.name;
+  document.getElementById('emp-id-display').textContent=curUser.role;
+  document.getElementById('emp-avatar').textContent=curUser.name.charAt(0);
+  getGeo();checkToday();renderHist();
+}
+
+function getGeo(){
+  var st=document.getElementById('geo-status');
+  st.className='status-box status-info';
+  st.innerHTML='⏳ Mendapatkan lokasi...';
+  if(!navigator.geolocation){st.className='status-box status-err';st.innerHTML='❌ GPS tidak didukung';return}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    curGeo={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy};
+    var s=gS();
+    var dist=calcDist(curGeo.lat,curGeo.lng,s.lat,s.lng);
+    var ok=dist<=s.radius;
+    document.getElementById('geo-lat').textContent=curGeo.lat.toFixed(6);
+    document.getElementById('geo-lng').textContent=curGeo.lng.toFixed(6);
+    document.getElementById('geo-acc').textContent=Math.round(curGeo.acc)+' m';
+    document.getElementById('geo-dist').textContent=Math.round(dist)+' m';
+    document.getElementById('geo-info').style.display='grid';
+    if(ok){st.className='status-box status-ok';st.innerHTML='✅ Dalam area WAS GARAGE ('+Math.round(dist)+'m / maks '+s.radius+'m)'}
+    else{st.className='status-box status-warn';st.innerHTML='⚠️ Di luar area! ('+Math.round(dist)+'m / maks '+s.radius+'m)'}
+    document.getElementById('map-box').innerHTML='<iframe src="https://www.openstreetmap.org/export/embed.html?bbox='+(curGeo.lng-.002)+','+(curGeo.lat-.001)+','+(curGeo.lng+.002)+','+(curGeo.lat+.001)+'&layer=mapnik&marker='+curGeo.lat+','+curGeo.lng+'" loading="lazy"></iframe>';
+  },function(err){
+    st.className='status-box status-err';
+    st.innerHTML='❌ Gagal: '+err.message+'. Pastikan GPS aktif & izinkan lokasi.';
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+
+function calcDist(a,b,c,d){var R=6371000,dL=(c-a)*Math.PI/180,dO=(d-b)*Math.PI/180,x=Math.sin(dL/2)**2+Math.cos(a*Math.PI/180)*Math.cos(c*Math.PI/180)*Math.sin(dO/2)**2;return R*2*Math.atan2(Math.sqrt(x),Math.sqrt(1-x))}
+
+function startScan(){
+  document.getElementById('scan-res').classList.add('hidden');
+  scanner=new Html5Qrcode("reader");
+  scanner.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},function(txt){
+    var r=document.getElementById('scan-res');
+    r.classList.remove('hidden');
+    if(txt===gS().barcode){
+      r.className='status-box status-ok';
+      r.innerHTML='✅ QR WAS GARAGE TERVERIFIKASI<br><small>Silakan Clock IN/OUT</small>';
+      toast('✅ QR valid!');
+    } else {
+      r.className='status-box status-warn';
+      r.innerHTML='⚠️ QR bukan barcode bengkel<br><small>Terbaca: <b>'+txt+'</b></small>';
+    }
+    stopScan();
+  },function(){}).then(function(){
+    scanOn=true;
+    document.getElementById('btn-scan').classList.add('hidden');
+    document.getElementById('btn-stop').classList.remove('hidden');
+  }).catch(function(e){toast('❌ Kamera: '+e)});
+}
+
+function stopScan(){
+  if(scanner&&scanOn){scanner.stop().then(function(){scanOn=false;document.getElementById('btn-scan').classList.remove('hidden');document.getElementById('btn-stop').classList.add('hidden')}).catch(function(){})}
+}
+
+function today(){return new Date().toISOString().split('T')[0]}
+function now(){return new Date().toLocaleTimeString('id-ID',{hour12:false})}
+
+function checkToday(){
+  var recs=gA(),t=today(),r=recs.find(function(x){return x.eid===curUser.id&&x.date===t});
+  var st=document.getElementById('today-st'),rc=document.getElementById('today-rec'),bi=document.getElementById('btn-in'),bo=document.getElementById('btn-out');
+  if(!r){st.className='status-box status-info';st.innerHTML='ℹ️ Belum absen hari ini';rc.innerHTML='';bi.disabled=false;bo.disabled=true}
+  else if(r.ci&&!r.co){st.className='status-box status-ok';st.innerHTML='✅ Sudah Clock IN';rc.innerHTML='<b>IN:</b> '+r.ci;bi.disabled=true;bo.disabled=false}
+  else{st.className='status-box status-warn';st.innerHTML='🏠 Sudah absen lengkap';rc.innerHTML='<b>IN:</b> '+r.ci+' | <b>OUT:</b> '+r.co;bi.disabled=true;bo.disabled=true}
+}
+
+function clockIn(){
+  if(!curGeo){toast('❌ GPS belum didapat!');return}
+  var s=gS(),d=calcDist(curGeo.lat,curGeo.lng,s.lat,s.lng),ok=d<=s.radius,recs=gA();
+  recs.push({eid:curUser.id,ename:curUser.name,erole:curUser.role,date:today(),ci:now(),co:null,gi:ok,go:null,bc:s.barcode});
+  sA(recs);toast(ok?'✅ Clock IN berhasil!':'⚠️ Clock IN, tapi di luar area!');checkToday();renderHist();
+}
+
+function clockOut(){
+  if(!curGeo){toast('❌ GPS belum didapat!');return}
+  var s=gS(),d=calcDist(curGeo.lat,curGeo.lng,s.lat,s.lng),ok=d<=s.radius,recs=gA(),idx=recs.findIndex(function(x){return x.eid===curUser.id&&x.date===today()});
+  if(idx>=0){recs[idx].co=now();recs[idx].go=ok;sA(recs);toast(ok?'✅ Clock OUT berhasil!':'⚠️ Clock OUT, tapi di luar area!');checkToday();renderHist()}
+}
+
+function renderHist(){
+  var recs=gA(),tb=document.getElementById('emp-hist'),my=recs.filter(function(x){return x.eid===curUser.id}).sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,7);
+  if(!my.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-light)">Belum ada data</td></tr>';return}
+  tb.innerHTML=my.map(function(r){var d=new Date(r.date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});var s=r.co?'<span class="badge badge-out">Lengkap</span>':'<span class="badge badge-in">Aktif</span>';return '<tr><td>'+d+'</td><td>'+(r.ci||'-')+'</td><td>'+(r.co||'-')+'</td><td>'+s+'</td></tr>'}).join('');
+}
+
+function initAdmin(){
+  var s=gS();
+  document.getElementById('s-lat').value=s.lat;
+  document.getElementById('s-lng').value=s.lng;
+  document.getElementById('s-rad').value=s.radius;
+  document.getElementById('s-bc').value=s.barcode;
+  document.getElementById('s-pass').value=s.adminPass;
+  document.getElementById('set-bc-display').textContent=s.barcode;
+  document.getElementById('f-date').value=today();
+  renderStats();renderTable();renderEmpList();renderFilter();
+}
+
+function renderStats(){
+  var e=gE(),r=gA(),t=today(),tr=r.filter(function(x){return x.date===t});
+  var h=new Set(tr.map(function(x){return x.eid})),p=new Set(tr.filter(function(x){return x.co}).map(function(x){return x.eid}));
+  document.getElementById('s-total').textContent=e.length;
+  document.getElementById('s-hadir').textContent=h.size;
+  document.getElementById('s-belum').textContent=e.length-h.size;
+  document.getElementById('s-pulang').textContent=p.size;
+}
+
+function renderTable(){
+  var recs=gA(),fd=document.getElementById('f-date').value,fe=document.getElementById('f-emp').value,f=recs;
+  if(fd) f=f.filter(function(x){return x.date===fd});
+  if(fe) f=f.filter(function(x){return x.eid===fe});
+  f.sort(function(a,b){return b.date.localeCompare(a.date)});
+  var tb=document.getElementById('t-body');
+  if(!f.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-light);padding:24px">Tidak ada data</td></tr>';return}
+  tb.innerHTML=f.map(function(r,i){
+    var d=new Date(r.date).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
+    var gi=r.gi?'<span class="badge badge-geo-ok">✅</span>':'<span class="badge badge-geo-fail">❌</span>';
+    var go=r.go!==null?(r.go?'<span class="badge badge-geo-ok">✅</span>':'<span class="badge badge-geo-fail">❌</span>'):'-';
+    return '<tr><td>'+(i+1)+'</td><td><strong>'+r.ename+'</strong><br><small style="color:var(--text-light)">'+r.eid+' • '+(r.erole||'')+'</small></td><td>'+d+'</td><td><span class="badge badge-in">'+(r.ci||'-')+'</span></td><td>'+(r.co?'<span class="badge badge-out">'+r.co+'</span>':'-')+'</td><td>'+gi+'</td><td>'+go+'</td><td><small>'+(r.bc||'-')+'</small></td></tr>';
+  }).join('');
+  renderStats();
+}
+
+function renderFilter(){
+  var e=gE(),s=document.getElementById('f-emp');
+  s.innerHTML='<option value="">Semua</option>'+e.map(function(x){return '<option value="'+x.id+'">'+x.name+' ('+x.role+')</option>'}).join('');
+}
+
+function renderEmpList(){
+  var e=gE(),c=document.getElementById('emp-list');
+  c.innerHTML=e.map(function(x){
+    return '<div class="emp-list-item"><div class="emp-avatar">'+x.name.charAt(0)+'</div><div class="emp-info"><strong>'+x.name+'</strong><br><small>'+x.id+' • '+x.role+'</small></div><button class="btn btn-sm btn-danger" onclick="rmEmp(\''+x.id+'\')">🗑️</button></div>';
+  }).join('');
+}
+
+function addEmp(){
+  var n=document.getElementById('n-name').value.trim(),r=document.getElementById('n-role').value.trim()||'Karyawan';
+  if(!n){toast('❌ Nama harus diisi!');return}
+  var e=gE(),id=n.toUpperCase().replace(/\s+/g,'')+String(e.length+1).slice(-2);
+  e.push({id:id,name:n,role:r});sE(e);
+  document.getElementById('n-name').value='';document.getElementById('n-role').value='';
+  toast('✅ '+n+' ditambahkan');renderEmpList();renderFilter();renderStats();
+}
+
+function rmEmp(id){
+  if(!confirm('Hapus karyawan ini?')) return;
+  sE(gE().filter(function(x){return x.id!==id}));renderEmpList();renderFilter();renderStats();toast('🗑️ Dihapus');
+}
+
+function saveSet(){
+  sS({lat:parseFloat(document.getElementById('s-lat').value),lng:parseFloat(document.getElementById('s-lng').value),radius:parseInt(document.getElementById('s-rad').value),barcode:document.getElementById('s-bc').value.trim(),adminPass:document.getElementById('s-pass').value.trim()});
+  document.getElementById('set-bc-display').textContent=document.getElementById('s-bc').value.trim();
+  toast('✅ Disimpan!');
+}
+
+function useLoc(){
+  if(!navigator.geolocation){toast('❌ GPS tidak tersedia');return}
+  navigator.geolocation.getCurrentPosition(function(p){document.getElementById('s-lat').value=p.coords.latitude;document.getElementById('s-lng').value=p.coords.longitude;toast('✅ Lokasi digunakan!')},function(){toast('❌ Gagal')});
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active')});
+  document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+  document.getElementById(id).classList.add('active');btn.classList.add('active');
+}
+
+function exportCSV(){
+  var r=gA();if(!r.length){toast('❌ Tidak ada data');return}
+  var c='No,ID,Nama,Role,Tanggal,IN,OUT,GeoIN,GeoOUT,BC\n';
+  r.forEach(function(x,i){c+=(i+1)+',"'+x.eid+'","'+x.ename+'","'+(x.erole||'')+'","'+x.date+'","'+x.ci+'","'+(x.co||'')+'","'+(x.gi?'Valid':'Luar')+'","'+(x.go!==null?(x.go?'Valid':'Luar'):'')+'","'+(x.bc||'')+'"\n'});
+  var b=new Blob([c],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='WAS-GARAGE-'+today()+'.csv';a.click();toast('📥 CSV diunduh!');
+}
+
+function clearData(){if(!confirm('⚠️ Hapus SEMUA data?'))return;if(!confirm('Yakin?'))return;localStorage.removeItem('wg_att');renderTable();toast('🗑️ Dihapus')}
+</script>
+</body>
+</html>
