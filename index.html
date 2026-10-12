@@ -24,8 +24,10 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .login-card .addr{color:var(--text-light);font-size:.78rem;margin-bottom:20px;line-height:1.4}
 .form-group{margin-bottom:14px;text-align:left}
 .form-group label{display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;color:var(--accent)}
-.form-group input,.form-group select{width:100%;padding:11px 14px;border:1.5px solid #cfd8dc;border-radius:8px;font-size:.95rem;outline:none}
-.form-group input:focus,.form-group select:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(198,40,40,.15)}
+.form-group input,.form-group select,.form-group textarea{width:100%;padding:11px 14px;border:1.5px solid #cfd8dc;border-radius:8px;font-size:.95rem;outline:none;font-family:inherit}
+.form-group textarea{resize:vertical;min-height:70px}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(198,40,40,.15)}
+.form-group small{color:var(--text-light);font-size:.78rem;margin-top:4px;display:block;line-height:1.4}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:.2s;width:100%}
 .btn-primary{background:var(--primary);color:#fff}
 .btn-success{background:var(--success);color:#fff}
@@ -39,7 +41,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(
 .status-warn{background:#fff3e0;color:#e65100;border:1px solid #ffcc80}
 .status-err{background:#ffebee;color:#b71c1c;border:1px solid #ef9a9a}
 .status-info{background:#e8eaf6;color:var(--accent);border:1px solid #9fa8da}
-#reader{width:100%;border-radius:8px;overflow:hidden;margin-bottom:12px}
+#reader,#reader-admin{width:100%;border-radius:8px;overflow:hidden;margin-bottom:12px}
 .clock-display{text-align:center;padding:16px;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:10px;margin-bottom:16px}
 .clock-time{font-size:2.8rem;font-weight:700;font-variant-numeric:tabular-nums}
 .clock-date{font-size:.95rem;opacity:.9;margin-top:2px}
@@ -56,8 +58,13 @@ tr:hover td{background:#fafafa}
 .badge-out{background:#ffebee;color:#b71c1c}
 .badge-geo-ok{background:#e8f5e9;color:#1b5e20}
 .badge-geo-fail{background:#ffebee;color:#b71c1c}
-.tabs{display:flex;gap:4px;background:#cfd8dc;border-radius:10px;padding:4px;margin-bottom:16px}
-.tab-btn{flex:1;padding:10px;border:none;background:transparent;border-radius:8px;font-size:.88rem;font-weight:600;cursor:pointer;color:var(--text-light)}
+.badge-sakit{background:#fff3e0;color:#e65100}
+.badge-izin{background:#e3f2fd;color:#1565c0}
+.badge-alpha{background:#ffebee;color:#b71c1c}
+.badge-cuti{background:#f3e5f5;color:#6a1b9a}
+.badge-manual{background:#fce4ec;color:#880e4f;font-size:.7rem;padding:2px 6px;margin-left:4px}
+.tabs{display:flex;gap:4px;background:#cfd8dc;border-radius:10px;padding:4px;margin-bottom:16px;overflow-x:auto}
+.tab-btn{flex:1;padding:10px;border:none;background:transparent;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--text-light);white-space:nowrap}
 .tab-btn.active{background:#fff;color:var(--primary);box-shadow:0 1px 4px rgba(0,0,0,.1)}
 .tab-content{display:none}
 .tab-content.active{display:block}
@@ -85,6 +92,16 @@ tr:hover td{background:#fafafa}
 .welcome-card .big-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:2rem;margin:0 auto 12px}
 .welcome-card h3{color:var(--accent);font-size:1.3rem;margin-bottom:4px}
 .welcome-card .role{color:var(--text-light);font-size:.9rem}
+.status-radio-group{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.status-radio{position:relative}
+.status-radio input{position:absolute;opacity:0;width:0;height:0}
+.status-radio label{display:block;padding:12px;border:2px solid #cfd8dc;border-radius:8px;text-align:center;cursor:pointer;font-weight:600;font-size:.88rem;transition:.2s}
+.status-radio input:checked+label.lbl-sakit{background:#fff3e0;border-color:#e65100;color:#e65100}
+.status-radio input:checked+label.lbl-izin{background:#e3f2fd;border-color:#1565c0;color:#1565c0}
+.status-radio input:checked+label.lbl-alpha{background:#ffebee;border-color:#b71c1c;color:#b71c1c}
+.status-radio input:checked+label.lbl-cuti{background:#f3e5f5;border-color:#6a1b9a;color:#6a1b9a}
+.manual-entry{background:#fff8e1;border-left:4px solid var(--warning);padding:10px;border-radius:6px;margin-bottom:8px;font-size:.85rem}
+.manual-entry strong{color:#e65100}
 </style>
 </head>
 <body>
@@ -128,14 +145,11 @@ tr:hover td{background:#fafafa}
       <div class="clock-time" id="emp-clock">00:00:00</div>
       <div class="clock-date" id="emp-date">-</div>
     </div>
-
-    <!-- CARD SAMBUTAN (TANPA BARCODE) -->
     <div class="card welcome-card">
       <div class="big-avatar" id="emp-avatar">A</div>
       <h3 id="emp-name">-</h3>
       <div class="role" id="emp-id-display">-</div>
     </div>
-
     <div class="card">
       <h2>📍 Lokasi GPS</h2>
       <div class="info-box"><strong>📍 WAS GARAGE</strong><br>Jl. Pramuka No. 72, Sario, Manado<br>Koordinat: 1.4676° N, 124.8383° E</div>
@@ -149,7 +163,6 @@ tr:hover td{background:#fafafa}
       <div class="map-placeholder" id="map-box">🗺️ Peta akan muncul setelah lokasi didapat</div>
       <button class="btn btn-sm btn-accent" style="margin-top:10px;width:100%" onclick="getGeo()">🔄 Refresh Lokasi</button>
     </div>
-
     <div class="card">
       <h2>📷 Scan QR Code Absensi</h2>
       <p style="font-size:.85rem;color:var(--text-light);margin-bottom:10px">Arahkan kamera ke QR Code yang tertempel di pintu masuk bengkel</p>
@@ -160,7 +173,6 @@ tr:hover td{background:#fafafa}
       </div>
       <div id="scan-res" class="status-box status-info hidden" style="margin-top:10px"></div>
     </div>
-
     <div class="card">
       <h2>⏰ Absensi Hari Ini</h2>
       <div id="today-st" class="status-box status-info">ℹ️ Belum absen hari ini</div>
@@ -170,7 +182,6 @@ tr:hover td{background:#fafafa}
         <button class="btn btn-danger" id="btn-out" onclick="clockOut()" disabled>🚪 Clock OUT</button>
       </div>
     </div>
-
     <div class="card">
       <h2>📋 Riwayat (7 Hari)</h2>
       <div class="table-wrapper">
@@ -195,7 +206,9 @@ tr:hover td{background:#fafafa}
     </div>
     <div class="tabs">
       <button class="tab-btn active" onclick="switchTab('t-absen',this)">📋 Data Absen</button>
+      <button class="tab-btn" onclick="switchTab('t-manual',this)">📝 Absen Manual</button>
       <button class="tab-btn" onclick="switchTab('t-emp',this)">👥 Karyawan</button>
+      <button class="tab-btn" onclick="switchTab('t-myabsen',this)">🕐 Absen Saya</button>
       <button class="tab-btn" onclick="switchTab('t-set',this)">⚙️ Setting</button>
     </div>
 
@@ -209,8 +222,69 @@ tr:hover td{background:#fafafa}
           <button class="btn btn-sm btn-danger" onclick="clearData()">🗑️ Hapus</button>
         </div>
         <div class="table-wrapper">
-          <table><thead><tr><th>No</th><th>Karyawan</th><th>Tanggal</th><th>IN</th><th>OUT</th><th>Geo IN</th><th>Geo OUT</th><th>Barcode</th></tr></thead><tbody id="t-body"></tbody></table>
+          <table><thead><tr><th>No</th><th>Karyawan</th><th>Tanggal</th><th>IN</th><th>OUT</th><th>Geo</th><th>Status</th></tr></thead><tbody id="t-body"></tbody></table>
         </div>
+      </div>
+    </div>
+
+    <!-- ⬇️ TAB BARU: ABSEN MANUAL ⬇️ -->
+    <div class="tab-content" id="t-manual">
+      <div class="card" style="border-top-color:var(--warning)">
+        <h2 style="color:var(--warning)">📝 Input Absensi Manual</h2>
+        <div class="info-box">
+          <strong>💡 Kapan digunakan?</strong><br>
+          Untuk mencatat karyawan yang <b>tidak bisa absen sendiri</b> karena:<br>
+          • 🤒 Sakit<br>
+          • 📋 Izin / Urusan Penting<br>
+          • 🏖️ Cuti<br>
+          • ❌ Alpha (tanpa keterangan)
+        </div>
+
+        <div class="form-group">
+          <label>👤 Pilih Karyawan</label>
+          <select id="m-emp">
+            <option value="">-- Pilih Karyawan --</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>📅 Tanggal</label>
+          <input type="date" id="m-date">
+        </div>
+
+        <div class="form-group">
+          <label>🏷️ Status Kehadiran</label>
+          <div class="status-radio-group">
+            <div class="status-radio">
+              <input type="radio" name="m-status" id="m-st-sakit" value="SAKIT" checked>
+              <label for="m-st-sakit" class="lbl-sakit">🤒 Sakit</label>
+            </div>
+            <div class="status-radio">
+              <input type="radio" name="m-status" id="m-st-izin" value="IZIN">
+              <label for="m-st-izin" class="lbl-izin">📋 Izin</label>
+            </div>
+            <div class="status-radio">
+              <input type="radio" name="m-status" id="m-st-alpha" value="ALPHA">
+              <label for="m-st-alpha" class="lbl-alpha">❌ Alpha</label>
+            </div>
+            <div class="status-radio">
+              <input type="radio" name="m-status" id="m-st-cuti" value="CUTI">
+              <label for="m-st-cuti" class="lbl-cuti">🏖️ Cuti</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>💬 Keterangan (opsional)</label>
+          <textarea id="m-note" placeholder="Contoh: Demam, acara keluarga, dll"></textarea>
+        </div>
+
+        <button class="btn btn-warning" onclick="saveManual()">💾 Simpan Absensi Manual</button>
+      </div>
+
+      <div class="card">
+        <h2>📜 Riwayat Absensi Manual</h2>
+        <div id="manual-history"></div>
       </div>
     </div>
 
@@ -226,6 +300,50 @@ tr:hover td{background:#fafafa}
       </div>
     </div>
 
+    <div class="tab-content" id="t-myabsen">
+      <div class="card welcome-card">
+        <div class="big-avatar" style="background:linear-gradient(135deg,#c62828,#1a237e)">C</div>
+        <h3>Cintya</h3>
+        <div class="role">Admin • WAS GARAGE</div>
+      </div>
+      <div class="card">
+        <h2>📍 Lokasi GPS Admin</h2>
+        <div id="admin-geo-status" class="status-box status-info">⏳ Mendapatkan lokasi...</div>
+        <div class="geo-info" id="admin-geo-info" style="display:none">
+          <div class="geo-item"><strong>Latitude</strong><span id="admin-geo-lat">-</span></div>
+          <div class="geo-item"><strong>Longitude</strong><span id="admin-geo-lng">-</span></div>
+          <div class="geo-item"><strong>Akurasi</strong><span id="admin-geo-acc">-</span></div>
+          <div class="geo-item"><strong>Jarak ke Bengkel</strong><span id="admin-geo-dist">-</span></div>
+        </div>
+        <button class="btn btn-sm btn-accent" style="margin-top:10px;width:100%" onclick="getAdminGeo()">🔄 Refresh Lokasi</button>
+      </div>
+      <div class="card">
+        <h2>📷 Scan QR Code (Admin)</h2>
+        <p style="font-size:.85rem;color:var(--text-light);margin-bottom:10px">Scan QR di pintu masuk untuk absensi admin</p>
+        <div id="reader-admin"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-sm btn-primary" id="btn-admin-scan" onclick="startAdminScan()">▶️ Mulai Scan</button>
+          <button class="btn btn-sm btn-danger hidden" id="btn-admin-stop" onclick="stopAdminScan()">⏹️ Stop</button>
+        </div>
+        <div id="admin-scan-res" class="status-box status-info hidden" style="margin-top:10px"></div>
+      </div>
+      <div class="card">
+        <h2>⏰ Absensi Admin Hari Ini</h2>
+        <div id="admin-today-st" class="status-box status-info">ℹ️ Belum absen hari ini</div>
+        <div id="admin-today-rec" style="font-size:.88rem;margin-bottom:12px"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-success" id="admin-btn-in" onclick="adminClockIn()">✅ Clock IN</button>
+          <button class="btn btn-danger" id="admin-btn-out" onclick="adminClockOut()" disabled>🚪 Clock OUT</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>📋 Riwayat Absensi Admin (7 Hari)</h2>
+        <div class="table-wrapper">
+          <table><thead><tr><th>Tanggal</th><th>IN</th><th>OUT</th><th>Status</th></tr></thead><tbody id="admin-hist"></tbody></table>
+        </div>
+      </div>
+    </div>
+
     <div class="tab-content" id="t-set">
       <div class="card">
         <h2>⚙️ Pengaturan</h2>
@@ -233,25 +351,15 @@ tr:hover td{background:#fafafa}
         <div class="form-group"><label>Latitude</label><input type="number" step="any" id="s-lat" value="1.4676"></div>
         <div class="form-group"><label>Longitude</label><input type="number" step="any" id="s-lng" value="124.8383"></div>
         <div class="form-group"><label>Radius (meter)</label><input type="number" id="s-rad" value="200"></div>
-        <div class="form-group"><label>Barcode Bengkel (sesuaikan dengan QR yang ditempel)</label><input type="text" id="s-bc" value="WAS-GARAGE-2026"></div>
+        <div class="form-group"><label>Barcode Bengkel</label><input type="text" id="s-bc" value="WAS-GARAGE-2026"></div>
         <div class="form-group"><label>Password Admin</label><input type="text" id="s-pass" value="cintya2026"></div>
         <button class="btn btn-primary" onclick="saveSet()">💾 Simpan</button>
         <button class="btn btn-sm btn-warning" style="margin-top:8px" onclick="useLoc()">📍 Gunakan Lokasi Saat Ini</button>
       </div>
       <div class="card">
         <h2>📌 Info Barcode Bengkel</h2>
-        <p style="font-size:.88rem;color:var(--text-light);margin-bottom:10px">
-          Barcode yang harus ada di QR Code yang Anda tempel di pintu masuk:
-        </p>
+        <p style="font-size:.88rem;color:var(--text-light);margin-bottom:10px">Barcode yang harus ada di QR Code di pintu masuk:</p>
         <div style="font-family:'Courier New',monospace;font-size:1.3rem;letter-spacing:3px;background:#f5f5f5;padding:12px;border-radius:6px;text-align:center;margin:8px 0;color:var(--primary);font-weight:700;border:2px dashed var(--accent)" id="set-bc-display">WAS-GARAGE-2026</div>
-        <p style="font-size:.82rem;color:var(--text-light);line-height:1.5">
-          💡 <strong>Cara buat QR:</strong><br>
-          1. Buka <b>qr-code-generator.com</b> atau <b>qrcode-monkey.com</b><br>
-          2. Pilih tipe <b>Text</b><br>
-          3. Masukkan teks barcode di atas<br>
-          4. Download & cetak (ukuran 15x15 cm)<br>
-          5. Laminating & tempel di pintu masuk bengkel
-        </p>
       </div>
     </div>
   </div>
@@ -265,8 +373,10 @@ var DEFS_EMP = [
   {id:'PRIMA',name:'Prima',role:'Helper Mekanik'}
 ];
 var DEFS_SET = {lat:1.4676,lng:124.8383,radius:200,barcode:'WAS-GARAGE-2026',adminPass:'cintya2026'};
+var ADMIN_ID = 'ADMIN-CINTYA';
 
 var curUser=null, curGeo=null, scanner=null, scanOn=false;
+var adminGeo=null, adminScanner=null, adminScanOn=false;
 
 function gE(){var d=localStorage.getItem('wg_emp');if(!d){localStorage.setItem('wg_emp',JSON.stringify(DEFS_EMP));return DEFS_EMP}return JSON.parse(d)}
 function sE(a){localStorage.setItem('wg_emp',JSON.stringify(a))}
@@ -300,8 +410,8 @@ function doLogin(){
 }
 
 function doLogout(){
-  stopScan();
-  curUser=null;curGeo=null;
+  stopScan();stopAdminScan();
+  curUser=null;curGeo=null;adminGeo=null;
   showPage('login');
 }
 
@@ -344,12 +454,12 @@ function getGeo(){
     document.getElementById('geo-acc').textContent=Math.round(curGeo.acc)+' m';
     document.getElementById('geo-dist').textContent=Math.round(dist)+' m';
     document.getElementById('geo-info').style.display='grid';
-    if(ok){st.className='status-box status-ok';st.innerHTML='✅ Dalam area WAS GARAGE ('+Math.round(dist)+'m / maks '+s.radius+'m)'}
-    else{st.className='status-box status-warn';st.innerHTML='⚠️ Di luar area! ('+Math.round(dist)+'m / maks '+s.radius+'m)'}
+    if(ok){st.className='status-box status-ok';st.innerHTML='✅ Dalam area WAS GARAGE ('+Math.round(dist)+'m)'}
+    else{st.className='status-box status-warn';st.innerHTML='⚠️ Di luar area! ('+Math.round(dist)+'m)'}
     document.getElementById('map-box').innerHTML='<iframe src="https://www.openstreetmap.org/export/embed.html?bbox='+(curGeo.lng-.002)+','+(curGeo.lat-.001)+','+(curGeo.lng+.002)+','+(curGeo.lat+.001)+'&layer=mapnik&marker='+curGeo.lat+','+curGeo.lng+'" loading="lazy"></iframe>';
   },function(err){
     st.className='status-box status-err';
-    st.innerHTML='❌ Gagal: '+err.message+'. Pastikan GPS aktif & izinkan lokasi.';
+    st.innerHTML='❌ Gagal: '+err.message;
   },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
 }
 
@@ -363,11 +473,11 @@ function startScan(){
     r.classList.remove('hidden');
     if(txt===gS().barcode){
       r.className='status-box status-ok';
-      r.innerHTML='✅ QR WAS GARAGE TERVERIFIKASI<br><small>Silakan Clock IN/OUT</small>';
-      toast('✅ QR valid!');
+      r.innerHTML='✅ QR WAS GARAGE TERVERIFIKASI';
+      toast('✅ QR valid! Silakan Clock IN/OUT.');
     } else {
       r.className='status-box status-warn';
-      r.innerHTML='⚠️ QR bukan barcode bengkel<br><small>Terbaca: <b>'+txt+'</b></small>';
+      r.innerHTML='⚠️ QR bukan barcode bengkel';
     }
     stopScan();
   },function(){}).then(function(){
@@ -408,9 +518,21 @@ function clockOut(){
 function renderHist(){
   var recs=gA(),tb=document.getElementById('emp-hist'),my=recs.filter(function(x){return x.eid===curUser.id}).sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,7);
   if(!my.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-light)">Belum ada data</td></tr>';return}
-  tb.innerHTML=my.map(function(r){var d=new Date(r.date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});var s=r.co?'<span class="badge badge-out">Lengkap</span>':'<span class="badge badge-in">Aktif</span>';return '<tr><td>'+d+'</td><td>'+(r.ci||'-')+'</td><td>'+(r.co||'-')+'</td><td>'+s+'</td></tr>'}).join('');
+  tb.innerHTML=my.map(function(r){
+    var d=new Date(r.date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});
+    var s='';
+    if(r.manual){
+      var stMap={SAKIT:'sakit',IZIN:'izin',ALPHA:'alpha',CUTI:'cuti'};
+      var stIcon={SAKIT:'🤒 Sakit',IZIN:'📋 Izin',ALPHA:'❌ Alpha',CUTI:'🏖️ Cuti'};
+      s='<span class="badge badge-'+stMap[r.mstatus]+'">'+stIcon[r.mstatus]+'</span>';
+    } else {
+      s=r.co?'<span class="badge badge-out">Lengkap</span>':'<span class="badge badge-in">Aktif</span>';
+    }
+    return '<tr><td>'+d+'</td><td>'+(r.ci||'-')+'</td><td>'+(r.co||'-')+'</td><td>'+s+'</td></tr>';
+  }).join('');
 }
 
+/* ===== ADMIN PAGE ===== */
 function initAdmin(){
   var s=gS();
   document.getElementById('s-lat').value=s.lat;
@@ -420,7 +542,9 @@ function initAdmin(){
   document.getElementById('s-pass').value=s.adminPass;
   document.getElementById('set-bc-display').textContent=s.barcode;
   document.getElementById('f-date').value=today();
-  renderStats();renderTable();renderEmpList();renderFilter();
+  document.getElementById('m-date').value=today();
+  renderStats();renderTable();renderEmpList();renderFilter();renderManualDropdown();renderManualHistory();
+  getAdminGeo();checkAdminToday();renderAdminHist();
 }
 
 function renderStats(){
@@ -438,12 +562,21 @@ function renderTable(){
   if(fe) f=f.filter(function(x){return x.eid===fe});
   f.sort(function(a,b){return b.date.localeCompare(a.date)});
   var tb=document.getElementById('t-body');
-  if(!f.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text-light);padding:24px">Tidak ada data</td></tr>';return}
+  if(!f.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text-light);padding:24px">Tidak ada data</td></tr>';return}
   tb.innerHTML=f.map(function(r,i){
     var d=new Date(r.date).toLocaleDateString('id-ID',{day:'numeric',month:'short',year:'numeric'});
     var gi=r.gi?'<span class="badge badge-geo-ok">✅</span>':'<span class="badge badge-geo-fail">❌</span>';
-    var go=r.go!==null?(r.go?'<span class="badge badge-geo-ok">✅</span>':'<span class="badge badge-geo-fail">❌</span>'):'-';
-    return '<tr><td>'+(i+1)+'</td><td><strong>'+r.ename+'</strong><br><small style="color:var(--text-light)">'+r.eid+' • '+(r.erole||'')+'</small></td><td>'+d+'</td><td><span class="badge badge-in">'+(r.ci||'-')+'</span></td><td>'+(r.co?'<span class="badge badge-out">'+r.co+'</span>':'-')+'</td><td>'+gi+'</td><td>'+go+'</td><td><small>'+(r.bc||'-')+'</small></td></tr>';
+    var statusBadge='';
+    if(r.manual){
+      var stMap={SAKIT:'sakit',IZIN:'izin',ALPHA:'alpha',CUTI:'cuti'};
+      var stIcon={SAKIT:'🤒 Sakit',IZIN:'📋 Izin',ALPHA:'❌ Alpha',CUTI:'🏖️ Cuti'};
+      statusBadge='<span class="badge badge-'+stMap[r.mstatus]+'">'+stIcon[r.mstatus]+'</span><span class="badge badge-manual">📝 MANUAL</span>';
+      if(r.mnote) statusBadge+='<br><small style="color:var(--text-light);font-style:italic">💬 '+r.mnote+'</small>';
+    } else {
+      var go=r.go!==null?(r.go?'<span class="badge badge-geo-ok">✅ OUT</span>':'<span class="badge badge-geo-fail">❌ OUT</span>'):'-';
+      statusBadge=gi+' '+go;
+    }
+    return '<tr><td>'+(i+1)+'</td><td><strong>'+r.ename+'</strong><br><small style="color:var(--text-light)">'+r.eid+' • '+(r.erole||'')+'</small></td><td>'+d+'</td><td><span class="badge badge-in">'+(r.ci||'-')+'</span></td><td>'+(r.co?'<span class="badge badge-out">'+r.co+'</span>':'-')+'</td><td>'+(r.manual?'-':gi)+'</td><td>'+statusBadge+'</td></tr>';
   }).join('');
   renderStats();
 }
@@ -466,12 +599,12 @@ function addEmp(){
   var e=gE(),id=n.toUpperCase().replace(/\s+/g,'')+String(e.length+1).slice(-2);
   e.push({id:id,name:n,role:r});sE(e);
   document.getElementById('n-name').value='';document.getElementById('n-role').value='';
-  toast('✅ '+n+' ditambahkan');renderEmpList();renderFilter();renderStats();
+  toast('✅ '+n+' ditambahkan');renderEmpList();renderFilter();renderStats();renderManualDropdown();
 }
 
 function rmEmp(id){
   if(!confirm('Hapus karyawan ini?')) return;
-  sE(gE().filter(function(x){return x.id!==id}));renderEmpList();renderFilter();renderStats();toast('🗑️ Dihapus');
+  sE(gE().filter(function(x){return x.id!==id}));renderEmpList();renderFilter();renderStats();renderManualDropdown();toast('🗑️ Dihapus');
 }
 
 function saveSet(){
@@ -493,12 +626,186 @@ function switchTab(id,btn){
 
 function exportCSV(){
   var r=gA();if(!r.length){toast('❌ Tidak ada data');return}
-  var c='No,ID,Nama,Role,Tanggal,IN,OUT,GeoIN,GeoOUT,BC\n';
-  r.forEach(function(x,i){c+=(i+1)+',"'+x.eid+'","'+x.ename+'","'+(x.erole||'')+'","'+x.date+'","'+x.ci+'","'+(x.co||'')+'","'+(x.gi?'Valid':'Luar')+'","'+(x.go!==null?(x.go?'Valid':'Luar'):'')+'","'+(x.bc||'')+'"\n'});
+  var c='No,ID,Nama,Role,Tanggal,IN,OUT,Status Kehadiran,Keterangan,GeoIN,GeoOUT,BC\n';
+  r.forEach(function(x,i){
+    var status='Hadir';
+    var ket='';
+    if(x.manual){
+      status=x.mstatus;
+      ket=x.mnote||'';
+    }
+    c+=(i+1)+',"'+x.eid+'","'+x.ename+'","'+(x.erole||'')+'","'+x.date+'","'+(x.ci||'')+'","'+(x.co||'')+'","'+status+'","'+ket+'","'+(x.gi?'Valid':'Luar')+'","'+(x.go!==null?(x.go?'Valid':'Luar'):'')+'","'+(x.bc||'')+'"\n';
+  });
   var b=new Blob([c],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='WAS-GARAGE-'+today()+'.csv';a.click();toast('📥 CSV diunduh!');
 }
 
-function clearData(){if(!confirm('⚠️ Hapus SEMUA data?'))return;if(!confirm('Yakin?'))return;localStorage.removeItem('wg_att');renderTable();toast('🗑️ Dihapus')}
+function clearData(){if(!confirm('⚠️ Hapus SEMUA data?'))return;if(!confirm('Yakin?'))return;localStorage.removeItem('wg_att');renderTable();renderAdminHist();renderManualHistory();toast('🗑️ Dihapus')}
+
+/* ===== FITUR ABSEN MANUAL ===== */
+function renderManualDropdown(){
+  var e=gE(),s=document.getElementById('m-emp');
+  s.innerHTML='<option value="">-- Pilih Karyawan --</option>'+e.map(function(x){return '<option value="'+x.id+'">'+x.name+' ('+x.role+')</option>'}).join('');
+}
+
+function saveManual(){
+  var empId=document.getElementById('m-emp').value;
+  var date=document.getElementById('m-date').value;
+  var status=document.querySelector('input[name="m-status"]:checked').value;
+  var note=document.getElementById('m-note').value.trim();
+
+  if(!empId){toast('❌ Pilih karyawan dulu!');return}
+  if(!date){toast('❌ Pilih tanggal!');return}
+
+  var emps=gE();
+  var emp=emps.find(function(e){return e.id===empId});
+  if(!emp){toast('❌ Karyawan tidak ditemukan');return}
+
+  // Cek apakah sudah ada absen di tanggal tersebut
+  var recs=gA();
+  var existing=recs.findIndex(function(x){return x.eid===empId&&x.date===date});
+  if(existing>=0){
+    if(!confirm('⚠️ Sudah ada data absen untuk '+emp.name+' di tanggal '+date+'.\n\nTimpa data lama?')) return;
+    recs.splice(existing,1);
+  }
+
+  var s=gS();
+  recs.push({
+    eid:emp.id,
+    ename:emp.name,
+    erole:emp.role,
+    date:date,
+    ci:null,
+    co:null,
+    gi:null,
+    go:null,
+    bc:s.barcode,
+    manual:true,
+    mstatus:status,
+    mnote:note,
+    createdBy:'ADMIN-CINTYA',
+    createdAt:new Date().toISOString()
+  });
+
+  sA(recs);
+  toast('✅ Absensi manual disimpan untuk '+emp.name);
+
+  // Reset form
+  document.getElementById('m-emp').value='';
+  document.getElementById('m-note').value='';
+  document.getElementById('m-date').value=today();
+  document.getElementById('m-st-sakit').checked=true;
+
+  renderTable();
+  renderManualHistory();
+  renderStats();
+}
+
+function renderManualHistory(){
+  var recs=gA();
+  var manualRecs=recs.filter(function(x){return x.manual}).sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,10);
+  var box=document.getElementById('manual-history');
+
+  if(!manualRecs.length){
+    box.innerHTML='<p style="text-align:center;color:var(--text-light);padding:20px">Belum ada absensi manual</p>';
+    return;
+  }
+
+  var stMap={SAKIT:'sakit',IZIN:'izin',ALPHA:'alpha',CUTI:'cuti'};
+  var stIcon={SAKIT:'🤒 Sakit',IZIN:'📋 Izin',ALPHA:'❌ Alpha',CUTI:'🏖️ Cuti'};
+
+  box.innerHTML=manualRecs.map(function(r){
+    var d=new Date(r.date).toLocaleDateString('id-ID',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    return '<div class="manual-entry"><div style="display:flex;justify-content:space-between;align-items:start;gap:8px;flex-wrap:wrap"><div><strong>'+r.ename+'</strong> <small style="color:var(--text-light)">('+r.erole+')</small><br><small>📅 '+d+'</small></div><span class="badge badge-'+stMap[r.mstatus]+'">'+stIcon[r.mstatus]+'</span></div>'+(r.mnote?'<div style="margin-top:6px;font-size:.82rem;color:var(--text-light)">💬 '+r.mnote+'</div>':'')+'<div style="margin-top:8px;text-align:right"><button class="btn btn-sm btn-danger" onclick="deleteManual(\''+r.eid+'\',\''+r.date+'\')">🗑️ Hapus</button></div></div>';
+  }).join('');
+}
+
+function deleteManual(empId,date){
+  if(!confirm('Hapus data absensi manual ini?')) return;
+  var recs=gA();
+  var newRecs=recs.filter(function(x){return !(x.eid===empId&&x.date===date&&x.manual)});
+  sA(newRecs);
+  toast('🗑️ Data absensi manual dihapus');
+  renderTable();
+  renderManualHistory();
+  renderStats();
+}
+
+/* ===== ABSEN ADMIN ===== */
+function getAdminGeo(){
+  var st=document.getElementById('admin-geo-status');
+  st.className='status-box status-info';
+  st.innerHTML='⏳ Mendapatkan lokasi...';
+  if(!navigator.geolocation){st.className='status-box status-err';st.innerHTML='❌ GPS tidak didukung';return}
+  navigator.geolocation.getCurrentPosition(function(pos){
+    adminGeo={lat:pos.coords.latitude,lng:pos.coords.longitude,acc:pos.coords.accuracy};
+    var s=gS();
+    var dist=calcDist(adminGeo.lat,adminGeo.lng,s.lat,s.lng);
+    var ok=dist<=s.radius;
+    document.getElementById('admin-geo-lat').textContent=adminGeo.lat.toFixed(6);
+    document.getElementById('admin-geo-lng').textContent=adminGeo.lng.toFixed(6);
+    document.getElementById('admin-geo-acc').textContent=Math.round(adminGeo.acc)+' m';
+    document.getElementById('admin-geo-dist').textContent=Math.round(dist)+' m';
+    document.getElementById('admin-geo-info').style.display='grid';
+    if(ok){st.className='status-box status-ok';st.innerHTML='✅ Dalam area WAS GARAGE ('+Math.round(dist)+'m)'}
+    else{st.className='status-box status-warn';st.innerHTML='⚠️ Di luar area! ('+Math.round(dist)+'m)'}
+  },function(err){
+    st.className='status-box status-err';
+    st.innerHTML='❌ Gagal: '+err.message;
+  },{enableHighAccuracy:true,timeout:15000,maximumAge:0});
+}
+
+function startAdminScan(){
+  document.getElementById('admin-scan-res').classList.add('hidden');
+  adminScanner=new Html5Qrcode("reader-admin");
+  adminScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},function(txt){
+    var r=document.getElementById('admin-scan-res');
+    r.classList.remove('hidden');
+    if(txt===gS().barcode){
+      r.className='status-box status-ok';
+      r.innerHTML='✅ QR WAS GARAGE TERVERIFIKASI';
+      toast('✅ QR valid!');
+    } else {
+      r.className='status-box status-warn';
+      r.innerHTML='⚠️ QR bukan barcode bengkel';
+    }
+    stopAdminScan();
+  },function(){}).then(function(){
+    adminScanOn=true;
+    document.getElementById('btn-admin-scan').classList.add('hidden');
+    document.getElementById('btn-admin-stop').classList.remove('hidden');
+  }).catch(function(e){toast('❌ Kamera: '+e)});
+}
+
+function stopAdminScan(){
+  if(adminScanner&&adminScanOn){adminScanner.stop().then(function(){adminScanOn=false;document.getElementById('btn-admin-scan').classList.remove('hidden');document.getElementById('btn-admin-stop').classList.add('hidden')}).catch(function(){})}
+}
+
+function checkAdminToday(){
+  var recs=gA(),t=today(),r=recs.find(function(x){return x.eid===ADMIN_ID&&x.date===t});
+  var st=document.getElementById('admin-today-st'),rc=document.getElementById('admin-today-rec'),bi=document.getElementById('admin-btn-in'),bo=document.getElementById('admin-btn-out');
+  if(!r){st.className='status-box status-info';st.innerHTML='ℹ️ Belum absen hari ini';rc.innerHTML='';bi.disabled=false;bo.disabled=true}
+  else if(r.ci&&!r.co){st.className='status-box status-ok';st.innerHTML='✅ Sudah Clock IN';rc.innerHTML='<b>IN:</b> '+r.ci;bi.disabled=true;bo.disabled=false}
+  else{st.className='status-box status-warn';st.innerHTML='🏠 Sudah absen lengkap';rc.innerHTML='<b>IN:</b> '+r.ci+' | <b>OUT:</b> '+r.co;bi.disabled=true;bo.disabled=true}
+}
+
+function adminClockIn(){
+  if(!adminGeo){toast('❌ GPS belum didapat!');return}
+  var s=gS(),d=calcDist(adminGeo.lat,adminGeo.lng,s.lat,s.lng),ok=d<=s.radius,recs=gA();
+  recs.push({eid:ADMIN_ID,ename:'Cintya',erole:'Admin',date:today(),ci:now(),co:null,gi:ok,go:null,bc:s.barcode});
+  sA(recs);toast(ok?'✅ Admin Clock IN berhasil!':'⚠️ Clock IN, tapi di luar area!');checkAdminToday();renderAdminHist();renderTable();renderStats();
+}
+
+function adminClockOut(){
+  if(!adminGeo){toast('❌ GPS belum didapat!');return}
+  var s=gS(),d=calcDist(adminGeo.lat,adminGeo.lng,s.lat,s.lng),ok=d<=s.radius,recs=gA(),idx=recs.findIndex(function(x){return x.eid===ADMIN_ID&&x.date===today()});
+  if(idx>=0){recs[idx].co=now();recs[idx].go=ok;sA(recs);toast(ok?'✅ Admin Clock OUT berhasil!':'⚠️ Clock OUT, tapi di luar area!');checkAdminToday();renderAdminHist();renderTable();renderStats();}
+}
+
+function renderAdminHist(){
+  var recs=gA(),tb=document.getElementById('admin-hist'),my=recs.filter(function(x){return x.eid===ADMIN_ID}).sort(function(a,b){return b.date.localeCompare(a.date)}).slice(0,7);
+  if(!my.length){tb.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--text-light)">Belum ada data</td></tr>';return}
+  tb.innerHTML=my.map(function(r){var d=new Date(r.date).toLocaleDateString('id-ID',{day:'numeric',month:'short'});var s=r.co?'<span class="badge badge-out">Lengkap</span>':'<span class="badge badge-in">Aktif</span>';return '<tr><td>'+d+'</td><td>'+(r.ci||'-')+'</td><td>'+(r.co||'-')+'</td><td>'+s+'</td></tr>'}).join('');
+}
 </script>
 </body>
 </html>
